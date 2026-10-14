@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Live Queue Test</title>
+<style>body{font-family:sans-serif;max-width:700px;margin:30px auto}input{padding:6px;margin:4px 0;width:100%;box-sizing:border-box}
+button{padding:8px 16px;margin-right:6px}#log{background:#111;color:#0f0;padding:10px;height:320px;overflow:auto;white-space:pre-wrap;font-size:13px}</style></head>
+<body><h2>Live Queue Tester</h2>
+<input id="token" placeholder="Access token"><input id="doctor" placeholder="Doctor ID" value="1">
+<label><input type="checkbox" id="notif" style="width:auto"> Also listen to /ws/notifications</label><br>
+<button onclick="connect()">Connect</button><button onclick="disconnectAll()">Disconnect</button>
+<h4>Live updates</h4><div id="log"></div>
+<script>
+let sockets=[];
+function log(m){const l=document.getElementById('log');l.textContent+=new Date().toLocaleTimeString()+'  '+m+'\n';l.scrollTop=l.scrollHeight}
+function open(url,label){const ws=new WebSocket(url);ws.onopen=()=>log('['+label+'] connected');
+ws.onmessage=e=>log('['+label+'] '+e.data);ws.onclose=e=>log('['+label+'] closed (code '+e.code+')');ws.onerror=()=>log('['+label+'] error');sockets.push(ws)}
+function connect(){const t=encodeURIComponent(document.getElementById('token').value.trim());const d=document.getElementById('doctor').value.trim();
+const proto=location.protocol==='https:'?'wss':'ws';open(proto+'://'+location.host+'/ws/queue/'+d+'?token='+t,'queue');
+if(document.getElementById('notif').checked)open(proto+'://'+location.host+'/ws/notifications?token='+t,'notify')}
+function disconnectAll(){sockets.forEach(s=>s.close());sockets=[]}
+</script></body></html>
